@@ -14,6 +14,27 @@ describe('AppointmentProducer', () => {
     scheduledAt: new Date('2026-11-02T10:00:00.000Z'),
   };
 
+  const originalUrl = process.env.RABBITMQ_URL;
+
+  beforeEach(() => {
+    process.env.RABBITMQ_URL = 'amqp://teste';
+  });
+
+  afterEach(() => {
+    if (originalUrl === undefined) delete process.env.RABBITMQ_URL;
+    else process.env.RABBITMQ_URL = originalUrl;
+  });
+
+  it('sem RABBITMQ_URL não publica e não quebra o agendamento', async () => {
+    delete process.env.RABBITMQ_URL;
+    const producer = new AppointmentProducer();
+    const emit = jest.fn();
+    (producer as any).client = { emit };
+
+    await expect(producer.publishReminder(reminderEvent)).resolves.toBeUndefined();
+    expect(emit).not.toHaveBeenCalled();
+  });
+
   it('aguarda a publicação do evento no broker', async () => {
     const producer = new AppointmentProducer();
     const emit = jest.fn().mockReturnValue(of(undefined));

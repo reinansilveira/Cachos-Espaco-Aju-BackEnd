@@ -23,7 +23,11 @@ API do sistema do salão Espaço Cachos Aju (Aracaju/SE), em NestJS + Prisma (Po
 
 ## Variáveis de ambiente (`.env`, nunca versionar valores)
 
-Veja `.env.example`. `PAYMENT_GATEWAY=fake` só vale fora de produção.
+Veja `.env.example`. `PAYMENT_GATEWAY=fake` só vale fora de produção. `RABBITMQ_URL` e `RESEND_API_KEY` são opcionais: sem eles a API sobe e só os avisos não saem.
+
+## Deploy
+
+Render (`render.yaml`, API + Redis), Neon (Postgres) e Vercel (site). Passo a passo em `docs/DEPLOY.md`.
 
 ## Convenções
 

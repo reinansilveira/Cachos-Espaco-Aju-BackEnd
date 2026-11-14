@@ -1,0 +1,43 @@
+# Blueprint do Render: API (Docker, plano grátis) + Redis (Key Value grátis).
+# O Postgres fica no Neon; a URL de conexão é pedida na criação (sync: false).
+services:
+  - type: web
+    name: cachos-aju-api
+    runtime: docker
+    plan: free
+    region: ohio
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /services
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: cachos-aju-redis
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: FRONTEND_URL
+        value: https://cachos-espaco-aju.vercel.app
+      - key: ASAAS_BASE_URL
+        value: https://api-sandbox.asaas.com/v3
+      - key: ASAAS_API_KEY
+        sync: false
+      - key: ASAAS_WEBHOOK_TOKEN
+        generateValue: true
+      - key: SEED_ADMIN_EMAIL
+        sync: false
+      - key: SEED_ADMIN_PASSWORD
+        sync: false
+
+  - type: keyvalue
+    name: cachos-aju-redis
+    plan: free
+    region: ohio
+    maxmemoryPolicy: allkeys-lru
+    ipAllowList: []

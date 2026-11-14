@@ -4,7 +4,10 @@ import { Resend } from 'resend';
 @Injectable()
 export class NotificationSenderService {
   private readonly logger = new Logger(NotificationSenderService.name);
-  private readonly resend = new Resend(process.env.RESEND_API_KEY);
+  // Sem chave a API sobe igual; só o envio de e-mail fica indisponível.
+  private readonly resend = process.env.RESEND_API_KEY
+    ? new Resend(process.env.RESEND_API_KEY)
+    : null;
   private readonly evolutionUrl = process.env.EVOLUTION_API_URL;
   private readonly evolutionKey = process.env.EVOLUTION_API_KEY;
   private readonly evolutionInstance = process.env.EVOLUTION_INSTANCE;
@@ -40,6 +43,10 @@ export class NotificationSenderService {
   }
 
   async sendEmail(email: string, subject: string, html: string, text: string): Promise<void> {
+    if (!this.resend) {
+      this.logger.warn('RESEND_API_KEY ausente: e-mail não enviado');
+      return;
+    }
     const { error } = await this.resend.emails.send({
       from: 'Notificações <onboarding@resend.dev>',
       to: email,

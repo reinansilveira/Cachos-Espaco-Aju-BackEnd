@@ -1,11 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { Resend } from 'resend';
 
 @Injectable()
 export class EmailService {
-    private resend = new Resend(process.env.RESEND_API_KEY);
+    // Sem chave a API sobe igual; só o envio de e-mail fica indisponível.
+    private resend = process.env.RESEND_API_KEY
+        ? new Resend(process.env.RESEND_API_KEY)
+        : null;
 
     async sendResetCode(to: string, code: string) {
+        if (!this.resend) {
+            throw new ServiceUnavailableException('Envio de e-mail não configurado.');
+        }
         await this.resend.emails.send({
             from: 'Espaço Cachos Aju <onboarding@resend.dev>',
             to,

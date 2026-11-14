@@ -1,27 +1,21 @@
 # Deploy
 
-A API sobe com o `Dockerfile` da raiz, que aplica as migrations (`prisma migrate deploy`) antes de iniciar. O front é um Next.js comum (Vercel ou qualquer host Node).
+Produção grátis: API e Redis no Render (`render.yaml`), Postgres no Neon e site na Vercel.
 
-## API
+## API (Render)
 
-Precisa de Postgres, Redis e RabbitMQ. No Railway: um serviço a partir deste repositório (detecta o `Dockerfile`), mais Postgres, Redis e RabbitMQ (template).
+- O `Dockerfile` da raiz aplica as migrations, roda o seed (se `SEED_ADMIN_EMAIL` existir) e sobe a API. O seed só cria o que falta e completa os horários dos próximos 28 dias, então cada reinício mantém a agenda aberta.
+- Crie pelo Blueprint (New > Blueprint, este repositório). Ele pede os valores marcados com `sync: false`:
+  - `DATABASE_URL`: string de conexão do Neon (projeto `cachos-aju`).
+  - `ASAAS_API_KEY`: chave do sandbox na fase de teste.
+  - `SEED_ADMIN_EMAIL` e `SEED_ADMIN_PASSWORD`: login da dona no painel.
+- `JWT_SECRET`, `JWT_REFRESH_SECRET` e `ASAAS_WEBHOOK_TOKEN` são gerados pelo Render.
+- RabbitMQ e Resend são opcionais: sem `RABBITMQ_URL` ou `RESEND_API_KEY` a API sobe e só os avisos por e-mail/WhatsApp não saem.
+- O plano grátis dorme depois de 15 min sem acesso; a primeira requisição depois disso leva uns 50 s.
+- Webhook do Asaas (Integrações > Webhooks): `https://<api>/webhooks/asaas`, com o valor de `ASAAS_WEBHOOK_TOKEN` que está no Render.
+- `FRONTEND_URL` precisa ser o domínio do site (CORS).
 
-Variáveis (nomes em `.env.example`, valores nunca no repositório):
+## Site (Vercel)
 
-- `DATABASE_URL` e `DIRECT_URL`: do Postgres.
-- `REDIS_URL` (ou `REDIS_HOST`/`REDIS_PORT`) e `RABBITMQ_URL`.
-- `JWT_SECRET`, `JWT_REFRESH_SECRET` (aleatórios e longos), `JWT_EXPIRES_IN`, `JWT_REFRESH_EXPIRES_IN`.
-- `FRONTEND_URL`: domínio do site, para o CORS.
-- `ASAAS_API_KEY`, `ASAAS_BASE_URL`, `ASAAS_WEBHOOK_TOKEN`. Para a fase de teste, chave e URL do sandbox (`https://api-sandbox.asaas.com/v3`). `PAYMENT_GATEWAY=fake` é ignorado com `NODE_ENV=production`.
-- `RESEND_API_KEY` e `EVOLUTION_*` só se for mandar e-mail e WhatsApp.
-- `SEED_ADMIN_EMAIL` e `SEED_ADMIN_PASSWORD`: conta da dona criada pelo seed.
-
-Depois do primeiro deploy, rode o seed uma vez no serviço (`node scripts/seed.js`): cria a conta da dona, serviços, as duas profissionais e horários de 28 dias. Rodar de novo completa os horários sem duplicar.
-
-No painel do Asaas (Integrações > Webhooks), cadastre `https://<api>/webhooks/asaas` com o mesmo `ASAAS_WEBHOOK_TOKEN`.
-
-## Front
-
-- `NEXT_PUBLIC_API_URL` e `BACKEND_URL`: URL pública da API.
+- `NEXT_PUBLIC_API_URL` e `BACKEND_URL`: URL pública da API no Render.
 - `NEXT_PUBLIC_SITE_URL`: domínio do site.
-- `NEXT_PUBLIC_BUSINESS_*`: contatos mostrados no site.

@@ -16,6 +16,15 @@ describe('NotificationSenderService', () => {
     }
   });
 
+  it('sem RESEND_API_KEY a API sobe e o e-mail só não sai', async () => {
+    delete process.env.RESEND_API_KEY;
+    const service = new NotificationSenderService();
+
+    await expect(
+      service.sendEmail('cliente@exemplo.com', 'Assunto', '<p>oi</p>', 'oi'),
+    ).resolves.toBeUndefined();
+  });
+
   it('propaga erro do WhatsApp para o consumer registrar FAILED', async () => {
     const service = new NotificationSenderService();
     jest.spyOn(global, 'fetch').mockResolvedValue({

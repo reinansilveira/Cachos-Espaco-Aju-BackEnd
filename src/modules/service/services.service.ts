@@ -1,0 +1,69 @@
+import { Injectable, BadRequestException, ConflictException } from '@nestjs/common';
+import { PrismaService } from '../../shared/prisma/prisma.service';
+import { CreateServicesDto } from './dto/create-services.dto';
+import { NotFoundException } from '@nestjs/common';
+
+@Injectable()
+export class Services {
+    constructor(private readonly prisma: PrismaService) { }
+
+    async findAll(active?: string) {
+        return this.prisma.service.findMany({
+            where: {
+                active: active === 'false' ? false : true,
+            },
+            // `order` define a vitrine do site; empate fica com o mais novo.
+            orderBy: [{ order: 'asc' }, { createdAt: 'desc' }],
+        });
+    }
+
+    async findById(id: string, active?: string) {
+        const service = await this.prisma.service.findFirst({
+            where: {
+                id,
+                active: active === 'false' ? false : true,
+            },
+        });
+
+        if (!service) {
+            throw new NotFoundException('Serviço não encontrado');
+        }
+
+        return service;
+    }
+
+    async create(dto: CreateServicesDto) {
+        if (!dto.duration || dto.duration <= 0) {
+            throw new BadRequestException('A duração do serviço deve ser maior que zero');
+        }
+        return this.prisma.service.create({
+            data: {
+                ...dto,
+            },
+        });
+    }
+
+    async update(id: string, data: CreateServicesDto) {
+        const service = await this.prisma.service.findUnique({
+            where: { id },
+        });
+
+        if (!service) {
+            throw new BadRequestException('Serviço não encontrado');
+        }
+
+        return this.prisma.service.update({
+            where: { id },
+            data: {
+                ...data,
+            },
+        });
+    }
+
+    async deactivate(id: string) {
+        return this.prisma.service.update({
+            where: { id },
+            data: { active: false },
+        });
+    }
+}

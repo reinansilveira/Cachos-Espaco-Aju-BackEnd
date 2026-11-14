@@ -34,6 +34,9 @@ services:
         sync: false
       - key: SEED_ADMIN_PASSWORD
         sync: false
+      # Dados de demonstração para a dona testar (cria uma vez só).
+      - key: SEED_DEMO
+        value: "true"
 
   - type: keyvalue
     name: cachos-aju-redis

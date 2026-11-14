@@ -17,5 +17,6 @@ COPY --from=build /app/scripts ./scripts
 COPY package*.json ./
 EXPOSE 3010
 # Aplica as migrations e roda o seed (só cria o que falta e completa os
-# horários dos próximos 28 dias) antes de subir a API.
-CMD ["sh", "-c", "npx prisma migrate deploy && if [ -n \"$SEED_ADMIN_EMAIL\" ]; then node scripts/seed.js; fi && node dist/main.js"]
+# horários dos próximos 28 dias) antes de subir a API. Com SEED_DEMO=true,
+# cria uma vez os dados de demonstração.
+CMD ["sh", "-c", "npx prisma migrate deploy && if [ -n \"$SEED_ADMIN_EMAIL\" ]; then node scripts/seed.js; fi && if [ \"$SEED_DEMO\" = true ]; then node scripts/seed-demo.js; fi && node dist/main.js"]

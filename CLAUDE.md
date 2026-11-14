@@ -7,6 +7,7 @@ API do sistema do salão Espaço Cachos Aju (Aracaju/SE), em NestJS + Prisma (Po
 - `npm run start:dev`: sobe a API com watch (porta `PORT`, padrão 3010)
 - `npm run build`: compila com `nest build`
 - `npm test`: testes unitários (Jest, arquivos `*.spec.ts`)
+- `node scripts/seed-demo.js`: dados de demonstração (clientes `@exemplo.com`, agenda, comandas, estoque). Roda uma vez por banco (configuração `demo.seeded`); no container, com `SEED_DEMO=true`.
 - `npm run seed`: conta da dona (`SEED_ADMIN_EMAIL`/`SEED_ADMIN_PASSWORD`), serviços do salão e produtos de exemplo. Pode rodar de novo.
 - `npm run prisma:generate`, `npm run prisma:migrate` (dev), `npm run prisma:deploy` (produção)
 

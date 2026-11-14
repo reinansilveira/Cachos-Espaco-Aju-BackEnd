@@ -10,22 +10,19 @@ const path = require('path');
 const bcrypt = require('bcrypt');
 const { PrismaClient } = require('@prisma/client');
 
-// Em produção não há `.env`: as variáveis vêm do ambiente.
+// Variáveis do ambiente valem sobre o `.env` (em produção ele nem existe).
 const envFile = path.join(__dirname, '..', '.env');
 const env = {
-  ...process.env,
   ...(fs.existsSync(envFile)
     ? Object.fromEntries(
         fs
           .readFileSync(envFile, 'utf8')
           .split('\n')
           .filter((line) => line.includes('=') && !line.startsWith('#'))
-          .map((line) => [
-            line.slice(0, line.indexOf('=')),
-            line.slice(line.indexOf('=') + 1).trim(),
-          ]),
+          .map((line) => [line.slice(0, line.indexOf('=')), line.slice(line.indexOf('=') + 1).trim()]),
       )
     : {}),
+  ...process.env,
 };
 
 // Catálogo do Trinks do salão (trinks.com/espaco-cachos-aju), novembro de 2026.
